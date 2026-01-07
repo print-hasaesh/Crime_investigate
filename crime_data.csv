@@ -1,7 +1,51 @@
-crime_id,outcome,area
-1,Solved,Kathmandu
-2,Unsolved,Lalitpur
-3,Solved,Bhaktapur
-4,Unsolved,
-5,Solved,Kathmandu
-6,Unsolved,
+crime_id,crime_type,area,outcome,severity,reported_date
+1,Theft,London,Solved,Low,2024-01-05
+2,Assault,Manchester,Unsolved,High,2024-01-10
+3,Burglary,London,Under Investigation,Medium,2024-02-02
+4,Robbery,Birmingham,SOLVED,High,2024-02-14
+5,Theft,,unsolved,Low,2024-02-20
+6,Fraud,London,Closed,Medium,2024-03-01
+7,Assault,Manchester, solved ,High,2024-03-12
+8,Burglary,Birmingham,UNSOLVED,Medium,2024-03-18
+9,Theft,London,Solved,Low,2024-04-05
+10,Fraud,,Under Investigation,High,2024-04-10
+11,Theft,Paris,Open,Low,2024-01-05
+12,Assault,Berlin,Unsolved,High,2024-01-10
+13,Burglary,Paris,Under Investigation,Medium,2024-02-02
+14,Robbery,Madrid,Closed,High,2024-02-14
+15,Theft,,Open,Low,2024-02-20
+16,Fraud,Paris,SOLVED,Medium,2024-03-01
+17,Assault,Berlin,Unsolved,High,2024-03-12
+18,Burglary,Madrid,Open,Medium,2024-03-18
+19,Theft,Paris,Solved,Low,2024-04-05
+20,Fraud,,Under Investigation,High,2024-04-10
+21,Theft,Rome,Open,Low,2024-01-05
+22,Assault,Milan,Unsolved,High,2024-01-10
+23,Burglary,Rome,Under Investigation,Medium,2024-02-02
+24,Robbery,Venice,Closed,High,2024-02-14
+25,Theft,,Unsolved,Low,2024-02-20
+26,Fraud,Rome,Solved,Medium,2024-03-01
+27,Assault,Milan,Open,High,2024-03-12
+28,Burglary,Venice,Unsolved,Medium,2024-03-18
+29,Theft,Rome,Solved,Low,2024-04-05
+30,Fraud,,Open,High,2024-04-10
+31,Theft,Amsterdam,Open,Low,2024-01-05
+32,Assault,Rotterdam,Unsolved,High,2024-01-10
+33,Burglary,Amsterdam,Under Investigation,Medium,2024-02-02
+34,Robbery,Utrecht,Closed,High,2024-02-14
+35,Theft,,Open,Low,2024-02-20
+36,Fraud,Amsterdam,Solved,Medium,2024-03-01
+37,Assault,Rotterdam,Open,High,2024-03-12
+38,Burglary,Utrecht,Unsolved,Medium,2024-03-18
+39,Theft,Amsterdam,Solved,Low,2024-04-05
+40,Fraud,,Under Investigation,High,2024-04-10
+41,Theft,Edinburgh,Open,Low,2024-01-05
+42,Assault,Glasgow,Unsolved,High,2024-01-10
+43,Burglary,Edinburgh,Under Investigation,Medium,2024-02-02
+44,Robbery,Dundee,Closed,High,2024-02-14
+45,Theft,,Unsolved,Low,2024-02-20
+46,Fraud,Edinburgh,Solved,Medium,2024-03-01
+47,Assault,Glasgow,Open,High,2024-03-12
+48,Burglary,Dundee,Unsolved,Medium,2024-03-18
+49,Theft,Edinburgh,Solved,Low,2024-04-05
+50,Fraud,,Open,High,2024-04-10
