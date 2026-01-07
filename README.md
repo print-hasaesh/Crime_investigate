@@ -1,16 +1,79 @@
-# Simple Crime Data Analysis
+# Crime Investigation Dashboard
 
-This project is a basic crime data analysis program written in Python using pandas and matplotlib. The program loads crime data from a CSV file, cleans the data, performs simple analysis, generates visualizations, and validates the results using automated tests.
+This project is a Python-based crime data analysis dashboard designed to demonstrate data cleaning, duplicate handling, and interactive visualization using Plotly. It is suitable for academic projects, hackathons, and demonstrations of data preprocessing and UI-driven analytics.
 
-The program reads a CSV file placed in the same directory and prints the total number of records loaded. It then removes rows with missing critical values such as crime outcome or area and prints the number of records remaining after cleaning.
+The dashboard reads crime data from a CSV file, performs automatic cleaning and normalization, and presents interactive charts through a Tkinter-based interface.
 
-After cleaning, the program analyzes the data to find the most common crime outcomes and the areas with the highest number of crimes. It also compares crime solving rates for cases that include location data versus those that do not. The solving rate with location data is expected to be higher.
+---
 
-Three bar charts are generated and saved as image files:
-- chart1_outcomes.png showing common crime outcomes  
-- chart2_areas.png showing areas with the highest crime counts  
-- chart3_solving_rates.png comparing solving rates  
+## Project Structure
 
-To run the program, place the CSV file in the same folder and execute:
-```bash
-python simple_crime_analysis.py
+The project folder must contain the following files:
+
+dashboard.py  
+crime_data.csv  
+README.md  
+requirements.txt  
+
+---
+
+## System Requirements
+
+Python version required:
+Python 3.9 or higher
+
+Supported operating systems:
+Windows, Linux, macOS
+
+---
+
+Download the ZIP file from the repository, extract it, and open a terminal or PowerShell inside the extracted folder.
+
+Verify that Python is installed:
+
+python --version
+
+
+If Python is not installed, download it from https://www.python.org
+ and ensure that "Add Python to PATH" is enabled during installation.
+
+(Optional but recommended) Create a virtual environment:
+
+    python -m venv venv
+    venv\Scripts\activate
+
+
+Install required dependencies:
+
+    pip install -r requirements.txt
+
+
+If requirements.txt is not used:
+
+    pip install pandas plotly
+
+
+If multiple Python versions are installed:
+
+    python -m pip install pandas plotly
+
+
+Verify Plotly installation (optional):
+
+    python -c "import plotly; print(plotly.__version__)"
+
+
+If no error appears, the installation was successful.
+
+Running the Application
+Ensure you are inside the project directory:
+
+    cd Crime_investigate
+
+
+Run the dashboard:
+
+    python dashboard.py
+
+
+A Tkinter window will open displaying multiple tabs.
