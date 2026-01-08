@@ -1,33 +1,9 @@
-"""
-Crime Analysis Dashboard (Interactive Version)
-----------------------------------------------
-This application demonstrates:
-- Data cleaning & normalization
-- Duplicate removal
-- Transparent preview of cleaned data
-- Interactive Plotly visualizations
-
-UI: Tkinter (control & data preview)
-Charts: Plotly (dynamic, interactive)
-
-Color Index:
-Solved   -> Green
-Unsolved -> Red
-"""
-
-# ============================
-# IMPORTS
-# ============================
 import os
 import pandas as pd
 import tkinter as tk
 from tkinter import ttk
 import plotly.express as px
 
-
-# ============================
-# CONFIGURATION
-# ============================
 FILE_NAME = "crime_data.csv"
 
 STATUS_COLORS = {
@@ -35,27 +11,23 @@ STATUS_COLORS = {
     "unsolved": "red"
 }
 
-
-# ============================
-# DATA LOADING & CLEANING
-# ============================
 if not os.path.exists(FILE_NAME):
     raise FileNotFoundError("crime_data.csv not found")
 
-# Load raw data
 df_raw = pd.read_csv(FILE_NAME)
 df_raw.columns = df_raw.columns.str.strip().str.lower()
 
-# Remove duplicates
-df = df_raw.drop_duplicates().copy()
+raw_count = len(df_raw)
 
-# Normalize outcome → status
+df = df_raw.drop_duplicates().copy()
+duplicates_removed = raw_count - len(df)
+
 df["outcome"] = df["outcome"].astype(str).str.strip().str.lower()
 
 SOLVED_VALUES = {"solved", "closed", "resolved"}
 UNSOLVED_VALUES = {"unsolved", "open", "under investigation", "pending"}
 
-def normalize_status(value: str):
+def normalize_status(value):
     if value in SOLVED_VALUES:
         return "solved"
     if value in UNSOLVED_VALUES:
@@ -63,14 +35,16 @@ def normalize_status(value: str):
     return None
 
 df["status"] = df["outcome"].apply(normalize_status)
+before_status = len(df)
 df = df.dropna(subset=["status"])
+invalid_status_removed = before_status - len(df)
 
+df["reported_date"] = pd.to_datetime(df["reported_date"], errors="coerce")
+df = df.dropna(subset=["reported_date"])
 
-# ============================
-# PLOTLY VISUALIZATIONS
-# ============================
-def show_status_plot():
-    """Interactive solved vs unsolved chart"""
+cleaned_count = len(df)
+
+def plot_status():
     data = df["status"].value_counts().reset_index()
     data.columns = ["status", "count"]
 
@@ -80,43 +54,34 @@ def show_status_plot():
         y="count",
         color="status",
         color_discrete_map=STATUS_COLORS,
-        title="Solved vs Unsolved Crimes",
-        text="count"
+        text="count",
+        title="Solved vs Unsolved Crimes"
     )
-
-    fig.update_layout(
-        xaxis_title="Crime Status",
-        yaxis_title="Number of Cases",
-        template="plotly_white"
-    )
-
+    fig.update_layout(template="plotly_white")
     fig.show()
 
-
-def show_crime_type_plot():
-    """Top crime types"""
+def plot_type():
     data = df["crime_type"].value_counts().head(10).reset_index()
     data.columns = ["crime_type", "count"]
 
     fig = px.bar(
         data,
-        x="count",
-        y="crime_type",
-        orientation="h",
-        title="Top Crime Types",
-        text="count"
+        x="crime_type",
+        y="count",
+        text="count",
+        title="Top Crime Types"
     )
 
     fig.update_layout(
-        yaxis=dict(categoryorder="total ascending"),
-        template="plotly_white"
+        template="plotly_white",
+        xaxis_title="Crime Type",
+        yaxis_title="Number of Cases"
     )
 
     fig.show()
 
 
-def show_area_plot():
-    """Crime distribution by area"""
+def plot_area():
     data = (
         df["area"]
         .dropna()
@@ -127,65 +92,100 @@ def show_area_plot():
         .reset_index()
     )
     data.columns = ["area", "count"]
-    data["percentage"] = (data["count"] / data["count"].sum()) * 100
 
     fig = px.bar(
         data,
         x="area",
         y="count",
-        text=data["percentage"].round(1).astype(str) + "%",
-        title="Top Crime Areas (Count & Percentage)"
+        text="count",
+        title="Top Crime Areas"
     )
-
-    fig.update_layout(
-        xaxis_title="Area",
-        yaxis_title="Number of Crimes",
-        template="plotly_white"
-    )
-
+    fig.update_layout(template="plotly_white")
     fig.show()
 
+def plot_timeline():
+    data = df.groupby(df["reported_date"].dt.to_period("M")).size().reset_index(name="count")
+    data["reported_date"] = data["reported_date"].astype(str)
 
-# ============================
-# DASHBOARD UI
-# ============================
+    fig = px.line(
+        data,
+        x="reported_date",
+        y="count",
+        markers=True,
+        title="Crime Trend Over Time"
+    )
+    fig.update_layout(template="plotly_white")
+    fig.show()
+
+PLOTS = [
+    ("Solved vs Unsolved", plot_status),
+    ("Crime Types", plot_type),
+    ("Crime Areas", plot_area),
+    ("Timeline", plot_timeline)
+]
+
 class CrimeDashboard:
 
     def __init__(self, root):
         self.root = root
         self.root.title("Crime Analysis Dashboard")
-        self.root.geometry("1100x700")
+        self.root.geometry("1150x720")
         self.root.resizable(False, False)
+
+        self.plot_index = 0
 
         notebook = ttk.Notebook(root)
         notebook.pack(fill="both", expand=True)
 
-        # Tabs
+        self.tab_summary = ttk.Frame(notebook)
         self.tab_data = ttk.Frame(notebook)
-        self.tab_status = ttk.Frame(notebook)
-        self.tab_type = ttk.Frame(notebook)
-        self.tab_area = ttk.Frame(notebook)
+        self.tab_visuals = ttk.Frame(notebook)
 
+        notebook.add(self.tab_summary, text="Summary")
         notebook.add(self.tab_data, text="Cleaned Data")
-        notebook.add(self.tab_status, text="Solved vs Unsolved")
-        notebook.add(self.tab_type, text="Crime Types")
-        notebook.add(self.tab_area, text="Crime Areas")
+        notebook.add(self.tab_visuals, text="Visual Analytics")
 
+        self.build_summary_tab()
         self.build_data_tab()
-        self.build_status_tab()
-        self.build_type_tab()
-        self.build_area_tab()
+        self.build_visual_tab()
 
-    # ============================
-    # CLEANED DATA TAB
-    # ============================
+    def build_summary_tab(self):
+        container = ttk.Frame(self.tab_summary)
+        container.pack(pady=40)
+
+        ttk.Label(
+            container,
+            text="Data Cleaning Overview",
+            font=("Segoe UI", 16, "bold")
+        ).pack(pady=10)
+
+        stats = [
+            ("Raw records loaded", raw_count),
+            ("Duplicate records removed", duplicates_removed),
+            ("Invalid status removed", invalid_status_removed),
+            ("Final cleaned records", cleaned_count)
+        ]
+
+        for label, value in stats:
+            ttk.Label(
+                container,
+                text=f"{label}: {value}",
+                font=("Segoe UI", 12)
+            ).pack(pady=6)
+
     def build_data_tab(self):
+        ttk.Label(
+            self.tab_data,
+            text="Cleaned & Normalized Crime Data",
+            font=("Segoe UI", 14, "bold")
+        ).pack(pady=10)
+
         columns = list(df.columns)
         tree = ttk.Treeview(self.tab_data, columns=columns, show="headings")
 
         for col in columns:
-            tree.heading(col, text=col.title())
-            tree.column(col, width=150, anchor="center")
+            tree.heading(col, text=col.upper())
+            tree.column(col, width=140, anchor="center")
 
         for _, row in df.iterrows():
             tree.insert("", "end", values=list(row))
@@ -196,58 +196,48 @@ class CrimeDashboard:
         tree.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
 
-    # ============================
-    # STATUS TAB
-    # ============================
-    def build_status_tab(self):
+    def build_visual_tab(self):
         ttk.Label(
-            self.tab_status,
-            text="Interactive visualization of solved vs unsolved crimes",
-            font=("Segoe UI", 11)
-        ).pack(pady=20)
-
-        ttk.Button(
-            self.tab_status,
-            text="Open Interactive Chart",
-            command=show_status_plot
+            self.tab_visuals,
+            text="Interactive Crime Analytics",
+            font=("Segoe UI", 14, "bold")
         ).pack(pady=10)
 
-    # ============================
-    # CRIME TYPE TAB
-    # ============================
-    def build_type_tab(self):
-        ttk.Label(
-            self.tab_type,
-            text="Top crime types based on frequency",
-            font=("Segoe UI", 11)
-        ).pack(pady=20)
+        self.selected_label = ttk.Label(
+            self.tab_visuals,
+            text=f"Selected Graph: {PLOTS[self.plot_index][0]}",
+            font=("Segoe UI", 11, "italic")
+        )
+        self.selected_label.pack(pady=8)
+
+        btn_frame = ttk.Frame(self.tab_visuals)
+        btn_frame.pack(pady=10)
+
+        ttk.Button(btn_frame, text="Previous", command=self.prev_plot).pack(side="left", padx=10)
+        ttk.Button(btn_frame, text="Next", command=self.next_plot).pack(side="left", padx=10)
 
         ttk.Button(
-            self.tab_type,
+            self.tab_visuals,
             text="Open Interactive Chart",
-            command=show_crime_type_plot
-        ).pack(pady=10)
-
-    # ============================
-    # AREA TAB
-    # ============================
-    def build_area_tab(self):
-        ttk.Label(
-            self.tab_area,
-            text="Crime distribution by area",
-            font=("Segoe UI", 11)
+            command=self.show_current_plot
         ).pack(pady=20)
 
-        ttk.Button(
-            self.tab_area,
-            text="Open Interactive Chart",
-            command=show_area_plot
-        ).pack(pady=10)
+    def show_current_plot(self):
+        PLOTS[self.plot_index][1]()
 
+    def next_plot(self):
+        self.plot_index = (self.plot_index + 1) % len(PLOTS)
+        self.update_label()
 
-# ============================
-# RUN APPLICATION
-# ============================
+    def prev_plot(self):
+        self.plot_index = (self.plot_index - 1) % len(PLOTS)
+        self.update_label()
+
+    def update_label(self):
+        self.selected_label.config(
+            text=f"Selected Graph: {PLOTS[self.plot_index][0]}"
+        )
+
 if __name__ == "__main__":
     root = tk.Tk()
     CrimeDashboard(root)
